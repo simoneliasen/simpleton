@@ -52,6 +52,13 @@ def get_data(dates, traininglength, df_features):
 
 
 def run(n_ensembles=1):
+
+    wandb.init(project='testusMaxmimus', entity='simoneliasen',
+                config={
+                    "hyperparameters_goes_here": 0.02
+                }
+            )
+    
     df_features = pd.read_csv("data/dataset.csv")
     hyperparameters = Hyperparameters(1, 461, None, None, "sgd", None, 32, 0.12467119874140932, 0.0019913732590904044, 0.0755042607191115, 3, None, None, 36)
     season =  ["Winter", "Spring", "Summer", "Fall"]

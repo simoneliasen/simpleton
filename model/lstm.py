@@ -73,8 +73,6 @@ def lstm_train_test_splitter(   df_features: pd.DataFrame,
     y_test = reshape_dataframe(test_targets, sequence_length_test, batch_size_test)
     return(x_train, y_train, x_test, y_test)
 
-
-
 class LSTMModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, dropout_prob):
         super(LSTMModel, self).__init__()
@@ -86,9 +84,12 @@ class LSTMModel(nn.Module):
 
         # LSTM layers
         self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, dropout=dropout_prob, batch_first=True)
+
         # Fully connected layer
-        self.fc = nn.Linear(hidden_dim, output_dim)
-        self.values_assigned = False        
+        self.fc = nn.Linear(hidden_dim, output_dim)  
+
+        #nn.init.xavier_uniform_(self.fc.weight)    <- xavier init
+        #torch.randn instead of torch.zeros below to change to <- random init
     
     def create_hidden_states(self, batch_size):
         h0 = torch.zeros(self.layer_dim, batch_size, self.hidden_dim, device=device).requires_grad_()
@@ -99,7 +100,7 @@ class LSTMModel(nn.Module):
         """x format is (batch_size, seq_len, input_dim)
         h0 and c0 can be inputted, they have the size (layer_dim, batch_size, hidden_dim) 
         where layer_dim is the number of stacked lstm's and hidden_dim is the number of nodes in each lstm"""
-        if h0 == None or c0 == None:
+        if h0 is None or c0 is None:
             h0,c0 = self.create_hidden_states(x.size(0))
 
         out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
@@ -137,7 +138,7 @@ class Optimization:
         for epoch in range(1, n_epochs + 1):
             batch_losses = []
             h0,c0,hn,cn = None,None,None,None
-            
+
             for train_batch, target_batch in zip(train_features, train_targets):
                 loss,hn,cn = self.train_step(train_batch, target_batch, h0, c0)
                 if forward_hn_cn:
