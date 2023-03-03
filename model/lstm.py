@@ -24,9 +24,22 @@ def get_mae_rmse(targets, predictions):
     """
     Tager targets og predictions for de 3 hubs og returnerer gennemsnitlig MAE og RMSE.
     """
-    mean_abs_error = np.mean(np.abs(targets - predictions), axis=1)
-    root_mean_squared_error = np.sqrt(np.mean(np.square(targets - predictions), axis=1))
-    return np.mean(mean_abs_error), np.mean(root_mean_squared_error)
+    maes = []
+    rmses = []
+    for i in range(len(targets)):
+        mean_abs_error = (targets[i] - predictions[i]).abs().mean()
+        mean_squared_error = (targets[i] - predictions[i]).square().mean()
+        root_mean_squared_error = mean_squared_error.sqrt()
+        maes.append(mean_abs_error.item())
+        rmses.append(root_mean_squared_error.item())
+        
+    avg_mae = sum(maes) / len(maes)
+    avg_rmse = sum(rmses) / len(rmses)
+    return avg_mae, avg_rmse
+
+#    mean_abs_error = np.mean(np.abs(targets - predictions), axis=1)
+#    root_mean_squared_error = np.sqrt(np.mean(np.square(targets - predictions), axis=1))
+ #   return np.mean(mean_abs_error), np.mean(root_mean_squared_error)
 
 def calculate_excess_rows(df, sequence_length, batch_size):
     number_of_batches = len(df) // (sequence_length * batch_size)
@@ -72,6 +85,8 @@ def lstm_train_test_splitter(   df_features: pd.DataFrame,
     x_test = reshape_dataframe(test_features, sequence_length_test, batch_size_test)
     y_test = reshape_dataframe(test_targets, sequence_length_test, batch_size_test)
     return(x_train, y_train, x_test, y_test)
+
+
 
 class LSTMModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, dropout_prob):
